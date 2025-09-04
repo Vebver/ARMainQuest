@@ -1,26 +1,23 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
-[RequireComponent(typeof(Rigidbody), typeof(BoxCollider))]
 public class PlayerController : MonoBehaviour
 {
-    [SerializeField] private Rigidbody _rigidbody;
-    [SerializeField] private FixedJoystick _joystick;
-    [SerializeField] private Animator _animator;
+    Vector2 moveVector;
+    public float moveSpeed = 5f;
+    
 
-    [SerializeField] private float _moveSpeed;
-
-    private void FixedUpdate()
+    public void InputPlayer(InputAction.CallbackContext _context)
     {
-        _rigidbody.velocity = new Vector3(_joystick.Horizontal * _moveSpeed, _rigidbody.velocity.y, _joystick.Vertical * _moveSpeed);
+        moveVector = _context.ReadValue<Vector2>();
+    }
 
-        if (_joystick.Horizontal != 0 || _joystick.Vertical != 0)
-        {
-            transform.rotation = Quaternion.LookRotation(_rigidbody.velocity);
-            _animator.SetBool("isRunning", true);
-        }
-        else
-            _animator.SetBool("isRunning", false);
+    private void Update()
+    {
+        Vector3 movement = new Vector3(moveVector.x, 0, moveVector.y);
+        movement.Normalize();
+        transform.Translate(moveSpeed * movement * Time.deltaTime);
     }
 }
