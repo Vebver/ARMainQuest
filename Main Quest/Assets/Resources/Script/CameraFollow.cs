@@ -1,17 +1,34 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class CameraFollow : MonoBehaviour
+public class FollowWithFixedRotation : MonoBehaviour
 {
-    public float FollowSpeed = 2f;
-    public float yOffset = 1f;
-    public Transform target;
+    [Header("Target Settings")]
+    public Transform target; // Character to follow
 
-    // Update is called once per frame
-    void Update()
+    [Header("Fixed Rotation")]
+    public Vector3 fixedRotation = new Vector3(30.707f, 160f, 0f);
+
+    private Vector3 offset; // Difference between camera and player at start
+
+    void Start()
     {
-        Vector3 newPos = new Vector3(target.position.x, target.position.y + yOffset, -10f);
-        transform.position = Vector3.Slerp(transform.position, newPos, FollowSpeed * Time.deltaTime);
+        if (target == null) return;
+
+        // Calculate initial offset from player to camera
+        offset = transform.position - target.position;
+
+        // Apply fixed rotation at start
+        transform.rotation = Quaternion.Euler(fixedRotation);
+    }
+
+    void LateUpdate()
+    {
+        if (target == null) return;
+
+        // Follow player by keeping the same offset
+        transform.position = target.position + offset;
+
+        // Keep fixed rotation
+        transform.rotation = Quaternion.Euler(fixedRotation);
     }
 }
