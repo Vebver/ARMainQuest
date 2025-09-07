@@ -1,8 +1,7 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class EnemyAI : MonoBehaviour
+public class EnemyChaserAI : MonoBehaviour
 {
     [Header("Enemy Stats")]
     public float health = 100f;
@@ -12,30 +11,24 @@ public class EnemyAI : MonoBehaviour
 
     [Header("Movement")]
     public float moveSpeed = 3f;
+    public float detectionRange = 8f; // Enemy will only chase player within this range
 
     [Header("Drops")]
-    public GameObject energyOrbPrefab; // Assign your EnergyOrb prefab here
-    public float energyDropChance = 0.3f; // 30% chance to drop energy
+    public GameObject[] dropPrefabs; // Assign buff prefabs here
+    public float dropChance = 0.3f;
 
     private NavMeshAgent navAgent;
     private Animator animator;
-    private GameObject Player;
-    private float lastAttackTime;
+    private GameObject player;
     private bool isDead = false;
+    private float lastAttackTime = -Mathf.Infinity;
 
     void Start()
     {
         navAgent = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
+        player = GameObject.FindWithTag("Player");
 
-        // Find Player
-        Player = GameObject.FindWithTag("Player");
-        if (Player == null)
-        {
-            Debug.LogError("Player not found! Make sure to tag your player GameObject as 'Player'");
-        }
-
-        // Setup NavMeshAgent
         if (navAgent != null)
         {
             navAgent.speed = moveSpeed;
@@ -45,21 +38,33 @@ public class EnemyAI : MonoBehaviour
 
     void Update()
     {
-        if (isDead || Player == null) return;
+        if (isDead || player == null) return;
 
-        if (navAgent != null && navAgent.enabled)
+        float distanceToPlayer = Vector3.Distance(transform.position, player.transform.position);
+
+        if (distanceToPlayer <= detectionRange)
         {
-            navAgent.SetDestination(Player.transform.position);
+            if (navAgent != null && navAgent.enabled)
+            {
+                navAgent.SetDestination(player.transform.position);
 
-            // Walk animation
-            bool isMoving = navAgent.velocity.magnitude > 0.1f;
-            animator.SetBool("IsWalking", isMoving);
+                if (animator != null)
+                    animator.SetBool("IsWalking", navAgent.velocity.magnitude > 0.1f);
+            }
 
-            // Attack when close
-            float distanceToPlayer = Vector3.Distance(transform.position, Player.transform.position);
+            // Attack if close enough and cooldown has passed
             if (distanceToPlayer <= attackRange && Time.time >= lastAttackTime + attackCooldown)
             {
                 AttackPlayer();
+            }
+        }
+        else
+        {
+            if (navAgent != null)
+            {
+                navAgent.ResetPath();
+                if (animator != null)
+                    animator.SetBool("IsWalking", false);
             }
         }
     }
@@ -68,14 +73,16 @@ public class EnemyAI : MonoBehaviour
     {
         lastAttackTime = Time.time;
 
-        // Stop moving when attacking
-        if (navAgent != null)
-        {
-            navAgent.ResetPath();
-        }
+        // Play attack animation if available
+        if (animator != null)
+            animator.SetTrigger("Attack");
 
-        // Play attack animation
-        animator.SetTrigger("Attack");
+        // Deal damage to player
+        PlayerBuffs buffs = player.GetComponent<PlayerBuffs>();
+        if (buffs != null)
+        {
+            buffs.TakeDamage(attackDamage);
+        }
     }
 
     public void TakeDamage(float damage)
@@ -83,11 +90,8 @@ public class EnemyAI : MonoBehaviour
         if (isDead) return;
 
         health -= damage;
-
         if (health <= 0)
-        {
             Die();
-        }
     }
 
     void Die()
@@ -95,31 +99,21 @@ public class EnemyAI : MonoBehaviour
         isDead = true;
 
         if (navAgent != null)
-        {
             navAgent.enabled = false;
-        }
 
-        animator.SetTrigger("Death");
+        if (animator != null)
+            animator.SetTrigger("Death");
 
         Collider col = GetComponent<Collider>();
         if (col != null)
-        {
             col.enabled = false;
-        }
 
-        if (Random.Range(0f, 1f) < energyDropChance)
+        if (dropPrefabs != null && dropPrefabs.Length > 0 && Random.value < dropChance)
         {
-            DropEnergyOrb();
+            int index = Random.Range(0, dropPrefabs.Length);
+            Instantiate(dropPrefabs[index], transform.position, Quaternion.identity);
         }
 
         Destroy(gameObject, 3f);
-    }
-
-    void DropEnergyOrb()
-    {
-        if (energyOrbPrefab != null)
-        {
-            Instantiate(energyOrbPrefab, transform.position, Quaternion.identity);
-        }
     }
 }

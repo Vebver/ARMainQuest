@@ -31,4 +31,14 @@ public class PlayerBuffs : MonoBehaviour
         yield return new WaitForSeconds(duration);
         revert();
     }
+    public void TakeDamage(float amount)
+    {
+        currentHealth -= amount;
+        if (currentHealth <= 0)
+        {
+            currentHealth = 0;
+            // Optionally, handle player death here
+            Debug.Log("Player died!");
+        }
+    }
 }
