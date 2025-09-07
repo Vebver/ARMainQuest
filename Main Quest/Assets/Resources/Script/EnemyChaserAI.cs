@@ -1,7 +1,8 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class EnemyChaserAI : MonoBehaviour
+public class EnemyAI : MonoBehaviour
 {
     [Header("Enemy Stats")]
     public float health = 100f;
@@ -11,15 +12,14 @@ public class EnemyChaserAI : MonoBehaviour
 
     [Header("Movement")]
     public float moveSpeed = 3f;
-    public float detectionRange = 8f;
 
     [Header("Drops")]
-    public GameObject[] dropPrefabs; // Assign at least 3 prefabs in the Inspector
-    public float dropChance = 0.3f; // 30% chance to drop an item
+    public GameObject energyOrbPrefab; // Assign your EnergyOrb prefab here
+    public float energyDropChance = 0.3f; // 30% chance to drop energy
 
     private NavMeshAgent navAgent;
     private Animator animator;
-    private GameObject player;
+    private GameObject Player;
     private float lastAttackTime;
     private bool isDead = false;
 
@@ -27,8 +27,15 @@ public class EnemyChaserAI : MonoBehaviour
     {
         navAgent = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
-        player = GameObject.FindWithTag("Player");
 
+        // Find Player
+        Player = GameObject.FindWithTag("Player");
+        if (Player == null)
+        {
+            Debug.LogError("Player not found! Make sure to tag your player GameObject as 'Player'");
+        }
+
+        // Setup NavMeshAgent
         if (navAgent != null)
         {
             navAgent.speed = moveSpeed;
@@ -38,34 +45,37 @@ public class EnemyChaserAI : MonoBehaviour
 
     void Update()
     {
-        if (isDead || player == null) return;
+        if (isDead || Player == null) return;
 
-        float distanceToPlayer = Vector3.Distance(transform.position, player.transform.position);
-
-        if (distanceToPlayer <= detectionRange)
+        if (navAgent != null && navAgent.enabled)
         {
-            if (navAgent != null && navAgent.enabled)
-            {
-                navAgent.SetDestination(player.transform.position);
+            navAgent.SetDestination(Player.transform.position);
 
-                bool isMoving = navAgent.velocity.magnitude > 0.1f;
-                if (animator != null)
-                {
-                    animator.SetBool("IsWalking", isMoving);
-                }
+            // Walk animation
+            bool isMoving = navAgent.velocity.magnitude > 0.1f;
+            animator.SetBool("IsWalking", isMoving);
+
+            // Attack when close
+            float distanceToPlayer = Vector3.Distance(transform.position, Player.transform.position);
+            if (distanceToPlayer <= attackRange && Time.time >= lastAttackTime + attackCooldown)
+            {
+                AttackPlayer();
             }
         }
-        else
+    }
+
+    void AttackPlayer()
+    {
+        lastAttackTime = Time.time;
+
+        // Stop moving when attacking
+        if (navAgent != null)
         {
-            if (navAgent != null)
-            {
-                navAgent.ResetPath();
-                if (animator != null)
-                {
-                    animator.SetBool("IsWalking", false);
-                }
-            }
+            navAgent.ResetPath();
         }
+
+        // Play attack animation
+        animator.SetTrigger("Attack");
     }
 
     public void TakeDamage(float damage)
@@ -89,10 +99,7 @@ public class EnemyChaserAI : MonoBehaviour
             navAgent.enabled = false;
         }
 
-        if (animator != null)
-        {
-            animator.SetTrigger("Death");
-        }
+        animator.SetTrigger("Death");
 
         Collider col = GetComponent<Collider>();
         if (col != null)
@@ -100,20 +107,19 @@ public class EnemyChaserAI : MonoBehaviour
             col.enabled = false;
         }
 
-        if (Random.Range(0f, 1f) < dropChance)
+        if (Random.Range(0f, 1f) < energyDropChance)
         {
-            DropRandomItem();
+            DropEnergyOrb();
         }
 
         Destroy(gameObject, 3f);
     }
 
-    void DropRandomItem()
+    void DropEnergyOrb()
     {
-        if (dropPrefabs != null && dropPrefabs.Length > 0)
+        if (energyOrbPrefab != null)
         {
-            int index = Random.Range(0, dropPrefabs.Length);
-            Instantiate(dropPrefabs[index], transform.position, Quaternion.identity);
+            Instantiate(energyOrbPrefab, transform.position, Quaternion.identity);
         }
     }
 }
