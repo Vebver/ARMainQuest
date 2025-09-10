@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.AI;
 
 public class EnemyChaserAI : MonoBehaviour
@@ -11,11 +11,14 @@ public class EnemyChaserAI : MonoBehaviour
 
     [Header("Movement")]
     public float moveSpeed = 3f;
-    public float detectionRange = 8f; // Enemy will only chase player within this range
+    public float detectionRange = 8f;
+
+    [Header("UI Drops")]
+    public Transform uiCanvas;
 
     [Header("Drops")]
-    public GameObject[] dropPrefabs; // Assign buff prefabs here
-    public float dropChance = 0.3f;
+    public GameObject[] dropPrefabs;
+    public float dropChance = 1f;
 
     private NavMeshAgent navAgent;
     private Animator animator;
@@ -33,6 +36,22 @@ public class EnemyChaserAI : MonoBehaviour
         {
             navAgent.speed = moveSpeed;
             navAgent.stoppingDistance = attackRange;
+        }
+
+        // disable ragdoll at start
+        SetRagdollActive(false);
+    }
+
+    // Called from an Animation Event during the attack animation
+    public void DealDamage()
+    {
+        if (isDead || player == null) return;
+
+        PlayerBuffs buffs = player.GetComponent<PlayerBuffs>();
+        if (buffs != null)
+        {
+            buffs.TakeDamage(attackDamage);
+            Debug.Log($"{name} attacked {player.name} for {attackDamage} damage!");
         }
     }
 
@@ -52,7 +71,6 @@ public class EnemyChaserAI : MonoBehaviour
                     animator.SetBool("IsWalking", navAgent.velocity.magnitude > 0.1f);
             }
 
-            // Attack if close enough and cooldown has passed
             if (distanceToPlayer <= attackRange && Time.time >= lastAttackTime + attackCooldown)
             {
                 AttackPlayer();
@@ -73,11 +91,9 @@ public class EnemyChaserAI : MonoBehaviour
     {
         lastAttackTime = Time.time;
 
-        // Play attack animation if available
         if (animator != null)
             animator.SetTrigger("Attack");
 
-        // Deal damage to player
         PlayerBuffs buffs = player.GetComponent<PlayerBuffs>();
         if (buffs != null)
         {
@@ -91,8 +107,43 @@ public class EnemyChaserAI : MonoBehaviour
 
         health -= damage;
         if (health <= 0)
+        {
             Die();
+        }
     }
+
+    void TryDropItem()
+    {
+        if (dropPrefabs == null || dropPrefabs.Length == 0) return;
+
+        int index = Random.Range(0, dropPrefabs.Length);
+
+        Canvas worldCanvas = FindObjectOfType<Canvas>();
+        if (worldCanvas == null)
+        {
+            Debug.LogError("⚠️ No Canvas found! Please add a World-Space Canvas to the scene.");
+            return;
+        }
+
+        GameObject drop = Instantiate(dropPrefabs[index], worldCanvas.transform);
+
+        // Position above enemy
+        drop.transform.position = transform.position + Vector3.up * 2f;
+
+        // 🔹 Resize here
+        RectTransform rt = drop.GetComponent<RectTransform>();
+        if (rt != null)
+        {
+            rt.sizeDelta = new Vector2(100, 100); // width, height in pixels
+        }
+
+        // OR scale it
+        drop.transform.localScale = Vector3.one * 0.5f; // 50% smaller
+    }
+
+
+
+
 
     void Die()
     {
@@ -101,19 +152,53 @@ public class EnemyChaserAI : MonoBehaviour
         if (navAgent != null)
             navAgent.enabled = false;
 
+        // 🔹 Play Death animation
         if (animator != null)
-            animator.SetTrigger("Death");
+        {
+            animator.ResetTrigger("Attack");   // stop pending attack anims
+            animator.SetBool("IsWalking", false);
+            animator.SetTrigger("Death");      // play Death trigger
+        }
 
+        // Disable main collider so player can’t keep hitting
         Collider col = GetComponent<Collider>();
         if (col != null)
             col.enabled = false;
 
-        if (dropPrefabs != null && dropPrefabs.Length > 0 && Random.value < dropChance)
+        // 🔹 Roll drop chance
+        TryDropItem();
+
+        // 🔹 Wait for Death animation before ragdoll
+        Invoke(nameof(EnableRagdoll), 2.5f); // match death animation length
+    }
+
+
+
+    void EnableRagdoll()
+    {
+        if (animator != null)
+            animator.enabled = false; // stop controlling bones
+
+        SetRagdollActive(true);
+
+        Destroy(gameObject, 5f); // cleanup after 5s
+    }
+
+    void SetRagdollActive(bool active)
+    {
+        Rigidbody[] bodies = GetComponentsInChildren<Rigidbody>();
+        Collider[] colliders = GetComponentsInChildren<Collider>();
+
+        foreach (var rb in bodies)
         {
-            int index = Random.Range(0, dropPrefabs.Length);
-            Instantiate(dropPrefabs[index], transform.position, Quaternion.identity);
+            if (rb != null && rb.gameObject != this.gameObject)
+                rb.isKinematic = !active;
         }
 
-        Destroy(gameObject, 3f);
+        foreach (var c in colliders)
+        {
+            if (c != null && c.gameObject != this.gameObject)
+                c.enabled = active;
+        }
     }
 }

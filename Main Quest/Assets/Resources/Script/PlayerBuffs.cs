@@ -12,6 +12,12 @@ public class PlayerBuffs : MonoBehaviour
     private Animator animator;
     private bool isDead = false;
 
+    [Header("Attack Settings")]
+    public float attackRange = 2f;
+    public LayerMask enemyLayer;
+    public float attackCooldown = 1f;  // seconds
+    private float lastAttackTime = -Mathf.Infinity;
+
     void Start()
     {
         animator = GetComponentInChildren<Animator>(); // finds animator on child (e.g., Alex)
@@ -32,7 +38,6 @@ public class PlayerBuffs : MonoBehaviour
     {
         maxHealth += amount;
         currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
-        // Optionally, you can revert maxHealth after duration if you want it temporary
     }
 
     private IEnumerator BuffRoutine(System.Action apply, System.Action revert, float duration)
@@ -41,9 +46,10 @@ public class PlayerBuffs : MonoBehaviour
         yield return new WaitForSeconds(duration);
         revert();
     }
+
     public void TakeDamage(float amount)
     {
-        if (isDead) return; // stop taking damage when dead
+        if (isDead) return;
 
         currentHealth -= amount;
         if (currentHealth <= 0)
@@ -56,16 +62,44 @@ public class PlayerBuffs : MonoBehaviour
     private void Die()
     {
         isDead = true;
-
         Debug.Log("Player died!");
 
         if (animator != null)
         {
-            animator.SetTrigger("Death"); // 🔹 Play death animation
+            animator.SetTrigger("Death");
         }
 
-        // Optional: disable movement scripts
         PlayerController controller = GetComponent<PlayerController>();
         if (controller != null) controller.enabled = false;
+    }
+
+    // 🔹 Call this method when Attack button is pressed
+    public void Attack()
+    {
+        if (isDead) return;
+        if (Time.time < lastAttackTime + attackCooldown) return; // cooldown check
+        lastAttackTime = Time.time;
+
+        if (animator != null)
+            animator.SetTrigger("Attack");
+
+        Collider[] hitEnemies = Physics.OverlapSphere(transform.position, attackRange, enemyLayer);
+
+        foreach (Collider enemy in hitEnemies)
+        {
+            EnemyChaserAI enemyAI = enemy.GetComponent<EnemyChaserAI>();
+            if (enemyAI != null)
+            {
+                enemyAI.TakeDamage(attack);
+                Debug.Log("Hit " + enemy.name + " for " + attack + " damage.");
+            }
+        }
+    }
+
+    // Just for visualization in Unity editor
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, attackRange);
     }
 }
