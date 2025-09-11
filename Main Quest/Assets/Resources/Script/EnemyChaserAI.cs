@@ -161,15 +161,26 @@ public class EnemyChaserAI : MonoBehaviour
         while (elapsed < fadeDuration)
         {
             elapsed += Time.deltaTime;
+
+            if (cg == null || drop == null)
+                yield break;
+
             cg.alpha = Mathf.Clamp01(elapsed / fadeDuration);
             yield return null;
         }
-        cg.alpha = 1f; // fully visible
 
-        // 🔹 Continuous rotation
+        if (cg != null)
+            cg.alpha = 1f;
+
+        // 🔁 Continuous rotation
         while (drop != null)
         {
             drop.transform.Rotate(Vector3.up * rotationSpeed * Time.deltaTime, Space.World);
+
+            // Optional: check if CanvasGroup still exists
+            if (cg == null)
+                yield break;
+
             yield return null;
         }
     }

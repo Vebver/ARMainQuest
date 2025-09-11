@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 5311193716170036304}
   - component: {fileID: 753128240751590525}
   - component: {fileID: 7796225746977452864}
+  - component: {fileID: -4634947169892212286}
   m_Layer: 5
   m_Name: ImageATK
   m_TagString: Untagged
@@ -75,3 +76,17 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &-4634947169892212286
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1757089976267632184}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98c7102fe9a89a24c8248a0723f0e43c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  attackIncrease: 10
+  duration: 10
