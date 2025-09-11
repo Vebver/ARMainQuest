@@ -26,19 +26,21 @@ public class PlayerBuffs : MonoBehaviour
 
     public void ApplyAttackBuff(float amount, float duration)
     {
+        Debug.Log("🔥 Buff received: +" + amount + " attack for " + duration + "s");
         StartCoroutine(BuffRoutine(() => attack += amount, () => attack -= amount, duration));
     }
 
     public void ApplyDefenseBuff(float amount, float duration)
     {
+        Debug.Log("🔥 Buff received: +" + amount + " attack for " + duration + "s");
         StartCoroutine(BuffRoutine(() => defense += amount, () => defense -= amount, duration));
     }
 
     public void ApplyHealthBuff(float amount, float duration)
     {
-        maxHealth += amount;
-        currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
+        StartCoroutine(BuffRoutine(() => maxHealth += amount, () => maxHealth -= amount, duration));
     }
+
 
     private IEnumerator BuffRoutine(System.Action apply, System.Action revert, float duration)
     {

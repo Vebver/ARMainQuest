@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 using UnityEngine.AI;
 
 public class EnemyChaserAI : MonoBehaviour
@@ -127,21 +128,51 @@ public class EnemyChaserAI : MonoBehaviour
 
         GameObject drop = Instantiate(dropPrefabs[index], worldCanvas.transform);
 
-        // Position above enemy
-        drop.transform.position = transform.position + Vector3.up * 2f;
+        // 🔹 Position above enemy death spot
+        float heightOffset = 0.5f;
+        drop.transform.position = transform.position + Vector3.up * heightOffset;
 
-        // 🔹 Resize here
+        // 🔹 Force Y rotation
+        drop.transform.rotation = Quaternion.Euler(180f, 0f, 0f);
+
+        // 🔹 Apply scale
+        drop.transform.localScale = new Vector3(-0.00567931452f, -0.00534023503f, 0.572300029f);
+
+        // Optional UI sizing
         RectTransform rt = drop.GetComponent<RectTransform>();
         if (rt != null)
         {
-            rt.sizeDelta = new Vector2(100, 100); // width, height in pixels
+            rt.sizeDelta = new Vector2(100, 100);
         }
 
-        // OR scale it
-        drop.transform.localScale = Vector3.one * 0.5f; // 50% smaller
+        // 🔹 Add CanvasGroup for fading
+        CanvasGroup cg = drop.GetComponent<CanvasGroup>();
+        if (cg == null) cg = drop.AddComponent<CanvasGroup>();
+        cg.alpha = 0f; // start invisible
+
+        // Start fade-in
+        StartCoroutine(FadeInAndRotate(drop, cg, 0.5f, 90f));
     }
 
+    IEnumerator FadeInAndRotate(GameObject drop, CanvasGroup cg, float fadeDuration, float rotationSpeed)
+    {
+        // Fade in first
+        float elapsed = 0f;
+        while (elapsed < fadeDuration)
+        {
+            elapsed += Time.deltaTime;
+            cg.alpha = Mathf.Clamp01(elapsed / fadeDuration);
+            yield return null;
+        }
+        cg.alpha = 1f; // fully visible
 
+        // 🔹 Continuous rotation
+        while (drop != null)
+        {
+            drop.transform.Rotate(Vector3.up * rotationSpeed * Time.deltaTime, Space.World);
+            yield return null;
+        }
+    }
 
 
 
