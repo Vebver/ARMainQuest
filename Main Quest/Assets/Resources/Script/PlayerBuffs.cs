@@ -26,13 +26,12 @@ public class PlayerBuffs : MonoBehaviour
 
     public void ApplyAttackBuff(float amount, float duration)
     {
-        Debug.Log("🔥 Buff received: +" + amount + " attack for " + duration + "s");
         StartCoroutine(BuffRoutine(() => attack += amount, () => attack -= amount, duration));
     }
 
+
     public void ApplyDefenseBuff(float amount, float duration)
     {
-        Debug.Log("🔥 Buff received: +" + amount + " attack for " + duration + "s");
         StartCoroutine(BuffRoutine(() => defense += amount, () => defense -= amount, duration));
     }
 
