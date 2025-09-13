@@ -13,7 +13,9 @@ public class PressToInteract : MonoBehaviour
     {
         //Input.GetKeyDown(KeyCode.E) pc
         //&& Input.GetTouch(0).phase == TouchPhase.Began) mobile
-        if (playerInRange && Input.GetKeyDown(KeyCode.E))
+        if (playerInRange && (Input.GetKeyDown(KeyCode.E) ||
+        (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)))
+
         {
             dialogueBox.SetActive(true);
             pressEIndicator.SetActive(false);
