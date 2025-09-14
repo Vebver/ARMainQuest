@@ -41,6 +41,8 @@ public class EnemyChaserAI : MonoBehaviour
 
         // disable ragdoll at start
         SetRagdollActive(false);
+        MobManager.Instance?.RegisterMob();
+
     }
 
     // Called from an Animation Event during the attack animation
@@ -209,6 +211,8 @@ public class EnemyChaserAI : MonoBehaviour
 
         // 🔹 Roll drop chance
         TryDropItem();
+
+        MobManager.Instance?.MobDefeated();
 
         // 🔹 Wait for Death animation before ragdoll
         Invoke(nameof(EnableRagdoll), 2.5f); // match death animation length

@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -12,6 +12,14 @@ public class EnemySpawner : MonoBehaviour
     [Header("Difficulty Scaling")]
     public float difficultyIncreaseRate = 0.1f;
     public float minSpawnInterval = 1f;
+
+    [Header("Boss Settings")]
+    public GameObject bossPrefab;
+    public Transform bossSpawnPoint;
+    public int totalMobsToDefeatBeforeBoss = 5;
+
+    private int defeatedMobs = 0;
+    private bool bossSpawned = false;
 
     private int currentEnemies = 0;
     private float currentSpawnInterval;
@@ -79,6 +87,12 @@ public class EnemySpawner : MonoBehaviour
     public void EnemyDied()
     {
         currentEnemies = Mathf.Max(0, currentEnemies - 1);
+        defeatedMobs++;
+
+        if (!bossSpawned && defeatedMobs >= totalMobsToDefeatBeforeBoss)
+        {
+            SpawnBoss();
+        }
     }
 
     public void StopSpawningFromLane(int index)
@@ -88,5 +102,14 @@ public class EnemySpawner : MonoBehaviour
             laneActive[index] = false;
             Debug.Log("Stopped spawning from lane: " + index);
         }
+    }
+
+    void SpawnBoss()
+    {
+        if (bossSpawned || bossPrefab == null || bossSpawnPoint == null) return;
+
+        Instantiate(bossPrefab, bossSpawnPoint.position, Quaternion.identity);
+        bossSpawned = true;
+        Debug.Log("👹 Boss spawned!");
     }
 }
