@@ -39,10 +39,10 @@ public class EnemyChaserAI : MonoBehaviour
             navAgent.stoppingDistance = attackRange;
         }
 
-        // disable ragdoll at start
+        // Disable ragdoll at start
         SetRagdollActive(false);
-        MobManager.Instance?.RegisterMob();
 
+        MobManager.Instance?.RegisterMob();
     }
 
     // Called from an Animation Event during the attack animation
@@ -69,7 +69,6 @@ public class EnemyChaserAI : MonoBehaviour
             if (navAgent != null && navAgent.enabled)
             {
                 navAgent.SetDestination(player.transform.position);
-
                 if (animator != null)
                     animator.SetBool("IsWalking", navAgent.velocity.magnitude > 0.1f);
             }
@@ -84,8 +83,7 @@ public class EnemyChaserAI : MonoBehaviour
             if (navAgent != null)
             {
                 navAgent.ResetPath();
-                if (animator != null)
-                    animator.SetBool("IsWalking", false);
+                if (animator != null) animator.SetBool("IsWalking", false);
             }
         }
     }
@@ -94,8 +92,7 @@ public class EnemyChaserAI : MonoBehaviour
     {
         lastAttackTime = Time.time;
 
-        if (animator != null)
-            animator.SetTrigger("Attack");
+        if (animator != null) animator.SetTrigger("Attack");
 
         PlayerBuffs buffs = player.GetComponent<PlayerBuffs>();
         if (buffs != null)
@@ -120,8 +117,8 @@ public class EnemyChaserAI : MonoBehaviour
         if (dropPrefabs == null || dropPrefabs.Length == 0) return;
 
         int index = Random.Range(0, dropPrefabs.Length);
-
         Canvas worldCanvas = FindObjectOfType<Canvas>();
+
         if (worldCanvas == null)
         {
             Debug.LogError("⚠️ No Canvas found! Please add a World-Space Canvas to the scene.");
@@ -142,10 +139,7 @@ public class EnemyChaserAI : MonoBehaviour
 
         // Optional UI sizing
         RectTransform rt = drop.GetComponent<RectTransform>();
-        if (rt != null)
-        {
-            rt.sizeDelta = new Vector2(100, 100);
-        }
+        if (rt != null) rt.sizeDelta = new Vector2(100, 100);
 
         // 🔹 Add CanvasGroup for fading
         CanvasGroup cg = drop.GetComponent<CanvasGroup>();
@@ -163,51 +157,39 @@ public class EnemyChaserAI : MonoBehaviour
         while (elapsed < fadeDuration)
         {
             elapsed += Time.deltaTime;
-
-            if (cg == null || drop == null)
-                yield break;
+            if (cg == null || drop == null) yield break;
 
             cg.alpha = Mathf.Clamp01(elapsed / fadeDuration);
             yield return null;
         }
 
-        if (cg != null)
-            cg.alpha = 1f;
+        if (cg != null) cg.alpha = 1f;
 
         // 🔁 Continuous rotation
         while (drop != null)
         {
             drop.transform.Rotate(Vector3.up * rotationSpeed * Time.deltaTime, Space.World);
-
-            // Optional: check if CanvasGroup still exists
-            if (cg == null)
-                yield break;
-
+            if (cg == null) yield break;
             yield return null;
         }
     }
 
-
-
     void Die()
     {
         isDead = true;
-
-        if (navAgent != null)
-            navAgent.enabled = false;
+        if (navAgent != null) navAgent.enabled = false;
 
         // 🔹 Play Death animation
         if (animator != null)
         {
-            animator.ResetTrigger("Attack");   // stop pending attack anims
+            animator.ResetTrigger("Attack"); // stop pending attack anims
             animator.SetBool("IsWalking", false);
-            animator.SetTrigger("Death");      // play Death trigger
+            animator.SetTrigger("Death");    // play Death trigger
         }
 
         // Disable main collider so player can’t keep hitting
         Collider col = GetComponent<Collider>();
-        if (col != null)
-            col.enabled = false;
+        if (col != null) col.enabled = false;
 
         // 🔹 Roll drop chance
         TryDropItem();
@@ -218,15 +200,10 @@ public class EnemyChaserAI : MonoBehaviour
         Invoke(nameof(EnableRagdoll), 2.5f); // match death animation length
     }
 
-
-
     void EnableRagdoll()
     {
-        if (animator != null)
-            animator.enabled = false; // stop controlling bones
-
+        if (animator != null) animator.enabled = false; // stop controlling bones
         SetRagdollActive(true);
-
         Destroy(gameObject, 5f); // cleanup after 5s
     }
 

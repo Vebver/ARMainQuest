@@ -23,4 +23,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Bakunawa.unity
     guid: 350450e038ec47846b4f3a1c166384b6
+  - enabled: 1
+    path: Assets/Scenes/Win.unity
+    guid: 95d18fa4dfc6c134aa4825ce86f32eaa
   m_configObjects: {}

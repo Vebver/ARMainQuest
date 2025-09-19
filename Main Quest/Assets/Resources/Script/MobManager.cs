@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class MobManager : MonoBehaviour
 {
@@ -26,6 +27,11 @@ public class MobManager : MonoBehaviour
     public void MobDefeated()
     {
         defeatedMobs++;
+        if(defeatedMobs == 4)
+        {
+            BossDefeated();
+        }
+
         if (defeatedMobs >= totalMobs)
         {
             SpawnBoss();
@@ -39,5 +45,11 @@ public class MobManager : MonoBehaviour
         Instantiate(bossPrefab, bossSpawnPoint.position, Quaternion.identity);
         bossSpawned = true;
         Debug.Log("👹 Boss spawned by EnemySpawner!");
+    }
+
+    public void BossDefeated()
+    {
+        Debug.Log("🏆 Boss defeated! Loading WinScene...");
+        SceneManager.LoadScene("Win");
     }
 }
