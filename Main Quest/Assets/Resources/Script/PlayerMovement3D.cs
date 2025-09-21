@@ -37,14 +37,6 @@ public class PlayerAnimationController : MonoBehaviour
         {
             alex.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
         }
-        else if (currentPos.x < lastPos.x) // Left
-        {
-            alex.transform.rotation = Quaternion.Euler(0f, -90f, 0f);
-        }
-        else if (currentPos.x > lastPos.x) // Right
-        {
-            alex.transform.rotation = Quaternion.Euler(0f, 90f, 0f);
-        }
 
         lastPos = currentPos;
     }
