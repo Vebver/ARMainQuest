@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.SceneManagement;
+
 
 public class PlayerBuffs : MonoBehaviour
 {
@@ -72,6 +74,7 @@ public class PlayerBuffs : MonoBehaviour
 
         PlayerController controller = GetComponent<PlayerController>();
         if (controller != null) controller.enabled = false;
+        SceneManager.LoadScene(0);
     }
 
     // 🔹 Call this method when Attack button is pressed
