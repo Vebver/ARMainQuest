@@ -88,12 +88,14 @@ public class EnemySpawner : MonoBehaviour
     {
         currentEnemies = Mathf.Max(0, currentEnemies - 1);
         defeatedMobs++;
+        Debug.Log("Enemy died! Defeated mobs: " + defeatedMobs);
 
         if (!bossSpawned && defeatedMobs >= totalMobsToDefeatBeforeBoss)
         {
             SpawnBoss();
         }
     }
+
 
     public void StopSpawningFromLane(int index)
     {
