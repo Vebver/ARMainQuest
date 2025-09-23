@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class winningUI : MonoBehaviour
+public class lose : MonoBehaviour
 {
-    public void QuitGame()
+    public void Retry()
     {
-        Debug.Log("Game Quit!");
-        Application.Quit();
+        SceneManager.LoadScene(2);
     }
     public void MainMenu()
     {
