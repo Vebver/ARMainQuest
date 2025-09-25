@@ -74,7 +74,7 @@ public class PlayerBuffs : MonoBehaviour
 
         PlayerController controller = GetComponent<PlayerController>();
         if (controller != null) controller.enabled = false;
-        SceneManager.LoadScene(0);
+        SceneManager.LoadScene(7);
     }
 
     // 🔹 Call this method when Attack button is pressed
