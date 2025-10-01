@@ -1,11 +1,13 @@
 ﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UI;
 
 public class EnemyChaserAI : MonoBehaviour
 {
     [Header("Enemy Stats")]
-    public float health = 100f;
+    public float maxHealth = 100f;
+    public float health;
     public float attackDamage = 10f;
     public float attackRange = 2f;
     public float attackCooldown = 1f;
@@ -13,6 +15,9 @@ public class EnemyChaserAI : MonoBehaviour
     [Header("Movement")]
     public float moveSpeed = 3f;
     public float detectionRange = 8f;
+
+    [Header("UI Healthbar")]
+    public Healthbar healthbar;
 
     [Header("UI Drops")]
     public Transform uiCanvas;
@@ -29,6 +34,8 @@ public class EnemyChaserAI : MonoBehaviour
 
     void Start()
     {
+        health = maxHealth;
+
         navAgent = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
         player = GameObject.FindWithTag("Player");
@@ -41,6 +48,12 @@ public class EnemyChaserAI : MonoBehaviour
 
         // Disable ragdoll at start
         SetRagdollActive(false);
+
+        // Initialize healthbar to full
+        if (healthbar != null)
+        {
+            healthbar.UpdateHealthbar(maxHealth, health);
+        }
 
         MobManager.Instance?.RegisterMob();
     }
@@ -106,6 +119,13 @@ public class EnemyChaserAI : MonoBehaviour
         if (isDead) return;
 
         health -= damage;
+
+        // Update UI healthbar
+        if (healthbar != null)
+        {
+            healthbar.UpdateHealthbar(maxHealth, health);
+        }
+
         if (health <= 0)
         {
             Die();
