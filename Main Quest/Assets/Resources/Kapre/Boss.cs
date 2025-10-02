@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Boss : MonoBehaviour
 {
@@ -14,5 +15,6 @@ public class Boss : MonoBehaviour
     {
         EnemyManager.Instance.BossDefeated();
         Destroy(gameObject);
+        SceneManager.LoadScene(6);
     }
 }

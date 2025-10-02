@@ -218,8 +218,8 @@ public class EnemyChaserAI : MonoBehaviour
 
         // 🔹 Wait for Death animation before ragdoll
         Invoke(nameof(EnableRagdoll), 2.5f); // match death animation length
-    }
 
+    }
     void EnableRagdoll()
     {
         if (animator != null) animator.enabled = false; // stop controlling bones
