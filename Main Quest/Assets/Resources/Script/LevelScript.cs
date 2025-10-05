@@ -52,5 +52,5 @@ public class LevelScript : MonoBehaviour
             level4Button.interactable = false;
             level4Button.image.color = new Color(0.7f, 0.7f, 0.7f);
         }
-    }
+}
 }
