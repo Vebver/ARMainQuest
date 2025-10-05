@@ -2,9 +2,9 @@
 using System.Collections;
 using UnityEngine.SceneManagement;
 
-
 public class PlayerBuffs : MonoBehaviour
 {
+    [Header("Player Stats")]
     public float attack = 10f;
     public float defense = 5f;
     public float maxHealth = 100f;
@@ -13,6 +13,7 @@ public class PlayerBuffs : MonoBehaviour
     [Header("References")]
     private Animator animator;
     private bool isDead = false;
+    public Healthbar healthbar;   // 👈 Reference to your Healthbar script
 
     [Header("Attack Settings")]
     public float attackRange = 2f;
@@ -24,13 +25,15 @@ public class PlayerBuffs : MonoBehaviour
     {
         animator = GetComponentInChildren<Animator>(); // finds animator on child (e.g., Alex)
         currentHealth = maxHealth;
+
+        if (healthbar != null)
+            healthbar.UpdateHealthbar(maxHealth, currentHealth);
     }
 
     public void ApplyAttackBuff(float amount, float duration)
     {
         StartCoroutine(BuffRoutine(() => attack += amount, () => attack -= amount, duration));
     }
-
 
     public void ApplyDefenseBuff(float amount, float duration)
     {
@@ -39,9 +42,21 @@ public class PlayerBuffs : MonoBehaviour
 
     public void ApplyHealthBuff(float amount, float duration)
     {
-        StartCoroutine(BuffRoutine(() => maxHealth += amount, () => maxHealth -= amount, duration));
+        StartCoroutine(BuffRoutine(() =>
+        {
+            maxHealth += amount;
+            currentHealth += amount; // heal a bit when buff applied
+            healthbar.UpdateHealthbar(maxHealth, currentHealth);
+        },
+        () =>
+        {
+            maxHealth -= amount;
+            if (currentHealth > maxHealth)
+                currentHealth = maxHealth;
+            healthbar.UpdateHealthbar(maxHealth, currentHealth);
+        },
+        duration));
     }
-
 
     private IEnumerator BuffRoutine(System.Action apply, System.Action revert, float duration)
     {
@@ -54,7 +69,13 @@ public class PlayerBuffs : MonoBehaviour
     {
         if (isDead) return;
 
-        currentHealth -= amount;
+        // Apply defense reduction
+        float damageTaken = Mathf.Max(amount - defense, 1);
+        currentHealth -= damageTaken;
+
+        if (healthbar != null)
+            healthbar.UpdateHealthbar(maxHealth, currentHealth);
+
         if (currentHealth <= 0)
         {
             currentHealth = 0;
@@ -68,12 +89,11 @@ public class PlayerBuffs : MonoBehaviour
         Debug.Log("Player died!");
 
         if (animator != null)
-        {
             animator.SetTrigger("Death");
-        }
 
         PlayerController controller = GetComponent<PlayerController>();
         if (controller != null) controller.enabled = false;
+
         SceneManager.LoadScene(7);
     }
 
