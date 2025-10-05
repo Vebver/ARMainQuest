@@ -8,7 +8,7 @@ public class EnemyChaserAI : MonoBehaviour
     [Header("Enemy Stats")]
     public float maxHealth = 100f;
     public float health;
-    public float attackDamage = 20f;
+    public float attackDamage = 30f;
     public float attackRange = 5f;
     public float attackCooldown = 1f;
 
@@ -74,7 +74,7 @@ public class EnemyChaserAI : MonoBehaviour
     {
         if (isDead || player == null) return;
 
-        PlayerBuffs buffs = player.GetComponent<PlayerBuffs>();
+        PlayerBuffs buffs = player.GetComponentInChildren<PlayerBuffs>();
         if (buffs != null)
         {
             buffs.TakeDamage(attackDamage);
