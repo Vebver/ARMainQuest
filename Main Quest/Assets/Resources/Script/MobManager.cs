@@ -27,7 +27,7 @@ public class MobManager : MonoBehaviour
     public void MobDefeated()
     {
         defeatedMobs++;
-        if(defeatedMobs == 4)
+        if(defeatedMobs == 3)
         {
             BossDefeated();
         }
