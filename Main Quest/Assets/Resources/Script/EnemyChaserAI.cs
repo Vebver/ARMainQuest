@@ -8,16 +8,13 @@ public class EnemyChaserAI : MonoBehaviour
     [Header("Enemy Stats")]
     public float maxHealth = 100f;
     public float health;
-    public float attackDamage = 30f;
-    public float attackRange = 5f;
+    public float attackDamage = 10f;
+    public float attackRange = 2f;
     public float attackCooldown = 1f;
 
     [Header("Movement")]
     public float moveSpeed = 3f;
     public float detectionRange = 8f;
-
-    [Header("References")]
-    public GameObject player;
 
     [Header("UI Healthbar")]
     public Healthbar healthbar;
@@ -31,25 +28,17 @@ public class EnemyChaserAI : MonoBehaviour
 
     private NavMeshAgent navAgent;
     private Animator animator;
+    private GameObject player;
     private bool isDead = false;
     private float lastAttackTime = -Mathf.Infinity;
 
     void Start()
     {
-        
-       if (player == null)
-    {
-        player = GameObject.FindWithTag("Player");
-        Debug.LogWarning("⚠️ Player not assigned in Inspector. Using tag lookup.");
-    }
-    else
-    {
-        Debug.Log($"✅ Player reference assigned: {player.name}");
-    }
-    health = maxHealth;
+        health = maxHealth;
 
         navAgent = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
+        player = GameObject.FindWithTag("Player");
 
         if (navAgent != null)
         {
@@ -74,17 +63,12 @@ public class EnemyChaserAI : MonoBehaviour
     {
         if (isDead || player == null) return;
 
-        PlayerBuffs buffs = player.GetComponentInChildren<PlayerBuffs>();
+        PlayerBuffs buffs = player.GetComponent<PlayerBuffs>();
         if (buffs != null)
         {
             buffs.TakeDamage(attackDamage);
             Debug.Log($"{name} attacked {player.name} for {attackDamage} damage!");
         }
-        else
-        {
-            Debug.LogWarning("PlayerBuffs not found!");
-        }
-
     }
 
     void Update()
@@ -122,6 +106,12 @@ public class EnemyChaserAI : MonoBehaviour
         lastAttackTime = Time.time;
 
         if (animator != null) animator.SetTrigger("Attack");
+
+        PlayerBuffs buffs = player.GetComponent<PlayerBuffs>();
+        if (buffs != null)
+        {
+            buffs.TakeDamage(attackDamage);
+        }
     }
 
     public void TakeDamage(float damage)
