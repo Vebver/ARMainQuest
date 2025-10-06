@@ -16,6 +16,9 @@ public class EnemyChaserAI : MonoBehaviour
     public float moveSpeed = 3f;
     public float detectionRange = 8f;
 
+    [Header("References")]
+    public GameObject player;
+
     [Header("UI Healthbar")]
     public Healthbar healthbar;
 
@@ -28,7 +31,6 @@ public class EnemyChaserAI : MonoBehaviour
 
     private NavMeshAgent navAgent;
     private Animator animator;
-    private GameObject player;
     private bool isDead = false;
     private float lastAttackTime = -Mathf.Infinity;
 
@@ -63,7 +65,7 @@ public class EnemyChaserAI : MonoBehaviour
     {
         if (isDead || player == null) return;
 
-        PlayerBuffs buffs = player.GetComponent<PlayerBuffs>();
+        PlayerBuffs buffs = player.GetComponentInChildren<PlayerBuffs>();
         if (buffs != null)
         {
             buffs.TakeDamage(attackDamage);

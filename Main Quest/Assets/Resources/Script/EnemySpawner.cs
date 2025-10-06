@@ -72,7 +72,13 @@ public class EnemySpawner : MonoBehaviour
                 if (activeLanes.Count > 0)
                 {
                     int spawnPointIndex = activeLanes[Random.Range(0, activeLanes.Count)];
-                    Instantiate(enemyPrefab, spawnPoints[spawnPointIndex].position, Quaternion.identity);
+                    GameObject enemy = Instantiate(enemyPrefab, spawnPoints[spawnPointIndex].position, Quaternion.identity);
+
+                    EnemyChaserAI ai = enemy.GetComponent<EnemyChaserAI>();
+                    if (ai != null)
+                    {
+                        ai.player = GameObject.FindWithTag("Player");
+                    }
                     currentEnemies++;
                 }
             }
@@ -110,7 +116,18 @@ public class EnemySpawner : MonoBehaviour
     {
         if (bossSpawned || bossPrefab == null || bossSpawnPoint == null) return;
 
-        Instantiate(bossPrefab, bossSpawnPoint.position, Quaternion.identity);
+        GameObject boss = Instantiate(bossPrefab, bossSpawnPoint.position, Quaternion.identity);
+
+        EnemyChaserAI ai = boss.GetComponent<EnemyChaserAI>();
+        if (ai != null)
+        {
+            ai.player = GameObject.FindWithTag("Player");
+            Debug.Log($"✅ Boss AI player reference assigned: {ai.player?.name}");
+        }
+        else
+        {
+            Debug.LogWarning("⚠️ EnemyChaserAI not found on boss prefab!");
+        }
         bossSpawned = true;
         Debug.Log("👹 Boss spawned!");
     }
