@@ -11,65 +11,80 @@ public class PlayerBuffs : MonoBehaviour
     public float currentHealth = 100f;
 
     [Header("References")]
+    public GameObject alex; // Assign Alex (child with Animator) in Inspector
+    public Healthbar healthbar;
+
     private Animator animator;
     private bool isDead = false;
-    public Healthbar healthbar;   // 👈 Reference to your Healthbar script
 
     [Header("Attack Settings")]
     public float attackRange = 2f;
     public LayerMask enemyLayer;
-    public float attackCooldown = 1f;  // seconds
+    public float attackCooldown = 1f;
     private float lastAttackTime = -Mathf.Infinity;
 
     void Start()
     {
-        animator = GetComponentInChildren<Animator>(); // finds animator on child (e.g., Alex)
+        if (alex != null)
+        {
+            animator = alex.GetComponent<Animator>();
+        }
+        else
+        {
+            Debug.LogWarning("⚠️ Alex reference not assigned in PlayerBuffs!");
+        }
+
         currentHealth = maxHealth;
 
         if (healthbar != null)
             healthbar.UpdateHealthbar(maxHealth, currentHealth);
     }
 
-    public void ApplyAttackBuff(float amount, float duration)
+    void Update()
     {
-        StartCoroutine(BuffRoutine(() => attack += amount, () => attack -= amount, duration));
-    }
+        if (isDead) return;
 
-    public void ApplyDefenseBuff(float amount, float duration)
-    {
-        StartCoroutine(BuffRoutine(() => defense += amount, () => defense -= amount, duration));
-    }
-
-    public void ApplyHealthBuff(float amount, float duration)
-    {
-        StartCoroutine(BuffRoutine(() =>
+        // 🖱️ Right-click triggers attack
+        if (Input.GetMouseButtonDown(1) && Time.time >= lastAttackTime + attackCooldown)
         {
-            maxHealth += amount;
-            currentHealth += amount; // heal a bit when buff applied
-            healthbar.UpdateHealthbar(maxHealth, currentHealth);
-        },
-        () =>
-        {
-            maxHealth -= amount;
-            if (currentHealth > maxHealth)
-                currentHealth = maxHealth;
-            healthbar.UpdateHealthbar(maxHealth, currentHealth);
-        },
-        duration));
+            Attack();
+        }
     }
 
-    private IEnumerator BuffRoutine(System.Action apply, System.Action revert, float duration)
+    public void Attack()
     {
-        apply();
-        yield return new WaitForSeconds(duration);
-        revert();
+        lastAttackTime = Time.time;
+
+        if (animator != null)
+            animator.SetTrigger("Attack");
+
+        Vector3 direction = alex != null ? alex.transform.forward : transform.forward;
+        Debug.DrawRay(transform.position, direction * attackRange, Color.red, 1f);
+
+        RaycastHit hit;
+        if (Physics.Raycast(transform.position, direction, out hit, attackRange, enemyLayer))
+        {
+            EnemyChaserAI enemyAI = hit.collider.GetComponentInParent<EnemyChaserAI>();
+            if (enemyAI != null)
+            {
+                enemyAI.TakeDamage(attack);
+                Debug.Log("Raycast hit " + hit.collider.name + " for " + attack + " damage.");
+            }
+            else
+            {
+                Debug.Log("Hit object has no EnemyChaserAI.");
+            }
+        }
+        else
+        {
+            Debug.Log("Raycast did not hit any enemy.");
+        }
     }
 
     public void TakeDamage(float amount)
     {
         if (isDead) return;
 
-        // Apply defense reduction
         float damageTaken = Mathf.Max(amount - defense, 1);
         currentHealth -= damageTaken;
 
@@ -97,30 +112,41 @@ public class PlayerBuffs : MonoBehaviour
         SceneManager.LoadScene(7);
     }
 
-    // 🔹 Call this method when Attack button is pressed
-    public void Attack()
+    public void ApplyAttackBuff(float amount, float duration)
     {
-        if (isDead) return;
-        if (Time.time < lastAttackTime + attackCooldown) return; // cooldown check
-        lastAttackTime = Time.time;
-
-        if (animator != null)
-            animator.SetTrigger("Attack");
-
-        Collider[] hitEnemies = Physics.OverlapSphere(transform.position, attackRange, enemyLayer);
-
-        foreach (Collider enemy in hitEnemies)
-        {
-            EnemyChaserAI enemyAI = enemy.GetComponent<EnemyChaserAI>();
-            if (enemyAI != null)
-            {
-                enemyAI.TakeDamage(attack);
-                Debug.Log("Hit " + enemy.name + " for " + attack + " damage.");
-            }
-        }
+        StartCoroutine(BuffRoutine(() => attack += amount, () => attack -= amount, duration));
     }
 
-    // Just for visualization in Unity editor
+    public void ApplyDefenseBuff(float amount, float duration)
+    {
+        StartCoroutine(BuffRoutine(() => defense += amount, () => defense -= amount, duration));
+    }
+
+    public void ApplyHealthBuff(float amount, float duration)
+    {
+        StartCoroutine(BuffRoutine(() =>
+        {
+            maxHealth += amount;
+            currentHealth += amount;
+            healthbar.UpdateHealthbar(maxHealth, currentHealth);
+        },
+        () =>
+        {
+            maxHealth -= amount;
+            if (currentHealth > maxHealth)
+                currentHealth = maxHealth;
+            healthbar.UpdateHealthbar(maxHealth, currentHealth);
+        },
+        duration));
+    }
+
+    private IEnumerator BuffRoutine(System.Action apply, System.Action revert, float duration)
+    {
+        apply();
+        yield return new WaitForSeconds(duration);
+        revert();
+    }
+
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;

@@ -38,16 +38,21 @@ public class PlayerAnimationController : MonoBehaviour
             alex.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
         }
 
+        // 🖱️ Trigger attack on right-click (Mouse1)
+        if (Input.GetMouseButtonDown(1)) // 1 = Right Click
+        {
+            TriggerAttack();
+        }
+
         lastPos = currentPos;
     }
 
-    // 🔹 Call this from your Attack Button
     public void TriggerAttack()
     {
         if (animator != null)
         {
-            animator.ResetTrigger("Attack"); // reset in case it’s already active
-            animator.SetTrigger("Attack");   // trigger again on each press
+            animator.ResetTrigger("Attack");
+            animator.SetTrigger("Attack");
         }
     }
 }
