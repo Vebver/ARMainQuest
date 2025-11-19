@@ -16,8 +16,8 @@ EditorBuildSettings:
     guid: 9fc0d4010bbf28b4594072e72b8655ab
   - enabled: 1
     path: Assets/Resources/Scenes/Visayas.unity
-    guid: 298b887153b360f4d90289f314eb2a1e
-  - enabled: 1
+    guid: eb9c6d74ef48dc9408325447a14e2ca3
+  - enabled: 0
     path: Assets/Resources/Scenes/Mindanao.unity
     guid: 435a6a7f2a6f89540979694d7b0d934f
   - enabled: 1
