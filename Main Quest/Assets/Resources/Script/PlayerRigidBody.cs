@@ -1,30 +1,37 @@
 using UnityEngine;
-using Vuforia;
 
-public class PlayerRigidHandler : DefaultObserverEventHandler
+public class PlayerRigidHandler : MonoBehaviour
 {
     [Header("Player Rigidbody")]
-    public Rigidbody playerRb; // Drag Player's Rigidbody here (not Alex)
+    public Rigidbody playerRb; // Assign in Inspector
 
-    protected override void OnTrackingFound()
+    private void Start()
     {
-        base.OnTrackingFound();
-
+        // Optional: Set initial state
         if (playerRb != null)
         {
-            playerRb.useGravity = true;    // Enable gravity
-            playerRb.isKinematic = false;  // Enable physics
+            playerRb.useGravity = false;
+            playerRb.isKinematic = true;
         }
     }
 
-    protected override void OnTrackingLost()
+    // Call this when you want to "activate" the player
+    public void EnablePhysics()
     {
-        base.OnTrackingLost();
-
         if (playerRb != null)
         {
-            playerRb.useGravity = false;   // Disable gravity
-            playerRb.isKinematic = true;   // Freeze in place
+            playerRb.useGravity = true;
+            playerRb.isKinematic = false;
+        }
+    }
+
+    // Call this when you want to "deactivate" the player
+    public void DisablePhysics()
+    {
+        if (playerRb != null)
+        {
+            playerRb.useGravity = false;
+            playerRb.isKinematic = true;
         }
     }
 }
