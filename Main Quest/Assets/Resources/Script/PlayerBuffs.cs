@@ -56,10 +56,10 @@ public class PlayerBuffs : MonoBehaviour
         lastAttackTime = Time.time;
 
         if (animator != null)
-            animator.SetTrigger("Attack");
+            animator.SetTrigger("Attacsk");
 
         Vector3 direction = alex != null ? alex.transform.forward : transform.forward;
-        Debug.DrawRay(transform.position, direction * attackRange, Color.red, 1f);
+        Debug.DrawRay(transform.position, direction * attackRange, Color.red, 5f);
 
         RaycastHit hit;
         if (Physics.Raycast(transform.position, direction, out hit, attackRange, enemyLayer))
