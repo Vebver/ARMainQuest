@@ -17,7 +17,7 @@ public class Boss : MonoBehaviour
         EnemyManager.Instance.BossDefeated();
 
         // 🔓 Unlock Visayas by marking Level 3 as completed
-        PlayerPrefs.SetInt("Level3Completed", 1);
+        PlayerPrefs.SetInt("Level2Completed", 1);
         PlayerPrefs.Save();
         Debug.Log("✅ Level 3 completed. Visayas region unlocked!");
 
@@ -25,6 +25,6 @@ public class Boss : MonoBehaviour
         Destroy(gameObject);
 
         // 🔁 Load Visayas scene (Scene index 6 assumed)
-        SceneManager.LoadScene(3); // Replace with "VisayasScene" if using scene name
+        SceneManager.LoadScene("Main Menu"); // Replace with actual name
     }
 }
