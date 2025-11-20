@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class Boss : MonoBehaviour
@@ -13,8 +13,18 @@ public class Boss : MonoBehaviour
 
     void Die()
     {
+        // Notify the EnemyManager
         EnemyManager.Instance.BossDefeated();
+
+        // 🔓 Unlock Visayas by marking Level 3 as completed
+        PlayerPrefs.SetInt("Level3Completed", 1);
+        PlayerPrefs.Save();
+        Debug.Log("✅ Level 3 completed. Visayas region unlocked!");
+
+        // Destroy boss object
         Destroy(gameObject);
-        SceneManager.LoadScene(6);
+
+        // 🔁 Load Visayas scene (Scene index 6 assumed)
+        SceneManager.LoadScene(3); // Replace with "VisayasScene" if using scene name
     }
 }

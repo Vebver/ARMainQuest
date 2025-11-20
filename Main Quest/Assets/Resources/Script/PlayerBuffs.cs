@@ -109,7 +109,7 @@ public class PlayerBuffs : MonoBehaviour
         PlayerController controller = GetComponent<PlayerController>();
         if (controller != null) controller.enabled = false;
 
-        SceneManager.LoadScene(7);
+        SceneManager.LoadScene(6);
     }
 
     public void ApplyAttackBuff(float amount, float duration)
